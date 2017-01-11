@@ -129,6 +129,15 @@ class Game:
 		shuffle(self.deck)
 
 if __name__ == '__main__':
+	from kivy.app import App
+	from kivy.uix.button import Button
+
+	class TestApp(App):
+		def build(self):
+			return Button(text='Hello World')
+
+	TestApp().run()
+	"""
 	g = Game(10)
 	g.prepararJuego()
 	from random import choice
@@ -139,3 +148,4 @@ if __name__ == '__main__':
 			g.voltearCarta(eleccion_random)
 		else:
 			g.game_over = True
+	"""
