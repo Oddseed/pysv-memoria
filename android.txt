@@ -1,0 +1,3 @@
+title=Juego de Memoria
+author=Jacob Cornejo
+orientation=portrait
