@@ -10,6 +10,28 @@ def print_debug(mensaje,tag='INFO'):
 	else:
 		print mensaje
 
+def rgb(r,g,b):
+	try:
+		assert r >= 0 and g >= 0 and b >= 0
+		assert r <= 255 and g <= 255 and b <= 255
+		return [r/255.,g/255.,b/255.,1]
+	except AssertionError:
+		return [1,1,1,1]
+
+
+COLORES = [
+	rgb(255, 0, 0),
+	rgb(255, 128, 0),
+	rgb(255, 255, 0),
+	rgb(128, 255, 0),
+	rgb(0, 255, 255),
+	rgb(0, 128, 255),
+	rgb(0, 0, 255),
+	rgb(128, 0, 255),
+	rgb(255, 0, 255),
+	rgb(255, 0, 128),
+]
+
 class Carta:
 	def __init__(self,valor):
 		self.id = valor
@@ -17,16 +39,16 @@ class Carta:
 		self.seEncotroPareja = False
 
 	def __str__(self):
-		if not self.estaBocaAbajo:
-			return 'Carta('+str(self.id)+')'
-		else:
-			return 'Carta(?)'
+		#if not self.estaBocaAbajo:
+		return 'Carta('+str(self.id)+')'
+		#else:
+		#	return 'Carta(?)'
 
 	def __repr__(self):
-		if not self.estaBocaAbajo:
-			return 'Carta('+str(self.id)+')'
-		else:
-			return 'Carta(?)'
+		#if not self.estaBocaAbajo:
+		return 'Carta('+str(self.id)+')'
+		#else:
+		#	return 'Carta(?)'
 
 class Game:
 	def __init__(self,cant_de_parejas):
@@ -111,16 +133,16 @@ class Game:
 
 	def generarPatrones(self):
 		from random import choice
-		posibles_caracteres = list("ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890")
-		posibles_colores = range(1,26)
-		posibles_figuras = range(1,11)
+		posibles_caracteres = list("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+		posibles_colores = range(10)
+		posibles_figuras = range(10)
 		self.patrones = []
 		while len(self.patrones) < self.cant_de_parejas:
-			self.patrones.append((choice(posibles_colores),
-								  choice(posibles_colores),
-								  choice(posibles_colores),
-								  choice(posibles_figuras),
-								  choice(posibles_caracteres)
+			self.patrones.append((choice(posibles_colores),   #Color de fondo
+								  choice(posibles_colores),   #Color de figura
+								  choice(posibles_colores),   #Color de fuente
+								  choice(posibles_figuras),   #Figura
+								  choice(posibles_caracteres) #Caracter
 								))
 			self.patrones = list(set(self.patrones))
 
@@ -138,7 +160,17 @@ if __name__ == '__main__':
 			g.prepararJuego()
 			layout = GridLayout(cols=5)
 			for carta in g.deck:
-				layout.add_widget(Button(text=str(carta.id)))
+				color_bg = g.patrones[carta.id-1][0]
+				color_fg = g.patrones[carta.id-1][1]
+				color_fn = g.patrones[carta.id-1][2]
+				figura = g.patrones[carta.id-1][3]
+				caracter = g.patrones[carta.id-1][4]
+				layout.add_widget(Button(text=caracter,
+										 background_color=COLORES[color_bg:color_bg+1][0],
+										 color=COLORES[color_fn:color_fn+1][0],
+
+				))
+
 			return layout
 
 	MemoriaApp().run()
