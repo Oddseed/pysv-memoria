@@ -131,21 +131,14 @@ class Game:
 if __name__ == '__main__':
 	from kivy.app import App
 	from kivy.uix.button import Button
-
-	class TestApp(App):
+	from kivy.uix.gridlayout import GridLayout
+	class MemoriaApp(App):
 		def build(self):
-			return Button(text='Hello World')
+			g = Game(10)
+			g.prepararJuego()
+			layout = GridLayout(cols=5)
+			for carta in g.deck:
+				layout.add_widget(Button(text=str(carta.id)))
+			return layout
 
-	TestApp().run()
-	"""
-	g = Game(10)
-	g.prepararJuego()
-	from random import choice
-	while not(g.game_over):
-		if MODO_DEBUG:
-			print_debug('MODO_DEBUG: True')
-			eleccion_random = choice(range(len(g.deck)))
-			g.voltearCarta(eleccion_random)
-		else:
-			g.game_over = True
-	"""
+	MemoriaApp().run()
