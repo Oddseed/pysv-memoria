@@ -1,6 +1,9 @@
 """
 Juego de memoria - Jacob Cornejo jacob@oddseed.com
 """
+from kivy.app import App
+from kivy.uix.button import Button
+from kivy.uix.gridlayout import GridLayout
 
 MODO_DEBUG = True
 
@@ -32,23 +35,37 @@ COLORES = [
     rgb(255, 0, 128),
 ]
 
-class Carta:
-    def __init__(self,valor):
+class Carta(Button):
+    def __init__(self,valor, *args, **kwargs):
+        super(Carta, self).__init__(*args, **kwargs)
         self.id = valor
         self.estaBocaAbajo = True
         self.seEncotroPareja = False
+        self.indice_widget = None
 
-    def __str__(self):
-        #if not self.estaBocaAbajo:
-        return 'Carta('+str(self.id)+')'
-        #else:
-        #   return 'Carta(?)'
+    def ver(self):
+        g =self.parent.GAME
+        n = int(self.id)
+        if self.estaBocaAbajo:
+            self.text='?'
+            self.background_color, self.color = [1, 1, 1, 1],[1, 1, 1, 1]
 
-    def __repr__(self):
-        #if not self.estaBocaAbajo:
-        return 'Carta('+str(self.id)+')'
-        #else:
-        #   return 'Carta(?)'
+        else:
+            color_bg = g.patrones[n-1][0]
+            color_fn = g.patrones[n-1][1]
+            caracter = g.patrones[n-1][2]
+            background_color=COLORES[color_bg:color_bg+1][0]
+            color=COLORES[color_fn:color_fn+1][0]
+            self.text=caracter
+            self.background_color=COLORES[color_bg:color_bg+1][0]
+            self.color=COLORES[color_fn:color_fn+1][0]
+
+    def press(self,carta):
+        g =self.parent.GAME
+        g.voltearCarta(self.indice_widget)
+        self.ver()
+
+
 
 class Game:
     def __init__(self,cant_de_parejas):
@@ -57,12 +74,6 @@ class Game:
         self.seleccion = []
         self.n_turno = 0
         self.game_over = False
-
-    def __str__(self):
-        return 'Juego('+str(self.deck)+')'
-
-    def __repr__(self):
-        return 'Juego('+str(self.deck)+')'
 
     def contarCartasBocaArriba(self):
         cantidad = 0
@@ -106,15 +117,20 @@ class Game:
     def generarCartas(self):
         for numero in range(1,self.cant_de_parejas+1):
             for x in range(2):
-                self.deck.append(Carta(numero))
+                carta_ins = Carta(valor=str(numero),text='?',font_size=200,bold=True)
+                carta_ins.bind(on_press=carta_ins.press)
+                self.deck.append(carta_ins)
 
-    def voltearBocaAbajoTodasLasCartas(self):
+    def voltearBocaAbajoTodasLasCartas(self,test):
+        print test
         for carta in self.deck:
             if not carta.seEncotroPareja:
                 carta.estaBocaAbajo = True
+                carta.ver()
 
 
     def turno(self):
+        from kivy.clock import Clock
         self.n_turno += 1
         cartas_boca_arriba = self.contarCartasBocaArriba()
         if cartas_boca_arriba == len(self.deck):
@@ -129,7 +145,7 @@ class Game:
             
             if len(self.seleccion) >= 2:
                 self.seleccion = []
-                self.voltearBocaAbajoTodasLasCartas()
+                Clock.schedule_once(self.voltearBocaAbajoTodasLasCartas, 5)
 
     def generarPatrones(self):
         from random import choice
@@ -139,9 +155,7 @@ class Game:
         self.patrones = []
         while len(self.patrones) < self.cant_de_parejas:
             self.patrones.append((choice(posibles_colores),   #Color de fondo
-                                  choice(posibles_colores),   #Color de figura
                                   choice(posibles_colores),   #Color de fuente
-                                  choice(posibles_figuras),   #Figura
                                   choice(posibles_caracteres) #Caracter
                                 ))
             self.patrones = list(set(self.patrones))
@@ -151,26 +165,16 @@ class Game:
         shuffle(self.deck)
 
 if __name__ == '__main__':
-    from kivy.app import App
-    from kivy.uix.button import Button
-    from kivy.uix.gridlayout import GridLayout
     class MemoriaApp(App):
         def build(self):
-            g = Game(10)
-            g.prepararJuego()
             layout = GridLayout(cols=5)
-            for carta in g.deck:
-                color_bg = g.patrones[carta.id-1][0]
-                color_fg = g.patrones[carta.id-1][1]
-                color_fn = g.patrones[carta.id-1][2]
-                figura = g.patrones[carta.id-1][3]
-                caracter = g.patrones[carta.id-1][4]
-                layout.add_widget(Button(text=caracter,
-                                         background_color=COLORES[color_bg:color_bg+1][0],
-                                         color=COLORES[color_fn:color_fn+1][0],
-
-                ))
-
+            layout.GAME = Game(10)
+            layout.GAME.prepararJuego()
+            i = 0
+            for carta in layout.GAME.deck:
+                carta.indice_widget = i
+                layout.add_widget(carta)
+                i +=1
             return layout
 
     MemoriaApp().run()
